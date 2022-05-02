@@ -11,7 +11,7 @@ class Redis
 	 *
 	 * @return \RedisCluster|\Redis|null
 	 */
-	private static function getClient(): \RedisCluster|\Redis|null
+	public static function getClient(): \RedisCluster|\Redis|null
 	{
 		if (!isset(self::$redis)) {
 			$config = self::getConfig();
