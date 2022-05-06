@@ -12,6 +12,6 @@
         "psr-4": {"Model\\Redis\\": "src/"}
     },
     "require": {
-        "model/config": "^0.3.0"
+        "model/config": "^0.4.0"
     }
 }
