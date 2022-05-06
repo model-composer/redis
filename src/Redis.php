@@ -16,8 +16,8 @@ class Redis
 		if (!isset(self::$redis)) {
 			$config = self::getConfig();
 
-			if ($config['host'] === 'session') // For development purposes
-				return null;
+			if (!$config['enabled'])
+				throw new \Exception('Redis is disabled');
 
 			if ($config['cluster']) {
 				self::$redis = new \RedisCluster(null, [$config['host'] . ':' . $config['port']]);
@@ -34,6 +34,16 @@ class Redis
 	}
 
 	/**
+	 * @return bool
+	 * @throws \Exception
+	 */
+	public static function isEnabled(): bool
+	{
+		$config = self::getConfig();
+		return $config['enabled'];
+	}
+
+	/**
 	 * Magic method for Redis methods
 	 *
 	 * @param string $name
@@ -43,18 +53,6 @@ class Redis
 	public static function __callStatic(string $name, array $arguments): mixed
 	{
 		$config = self::getConfig();
-
-		if ($config['host'] === 'session') { // For development purposes
-			switch ($name) {
-				case 'get':
-					return $_SESSION['redis:' . $arguments[0]] ?? null;
-
-				case 'set':
-					$_SESSION['redis:' . $arguments[0]] = $arguments[1];
-					return true;
-			}
-		}
-
 		if (!empty($arguments[0]) and $config['prefix'] ?? null)
 			$arguments[0] = $config['prefix'] . ':' . $arguments[0];
 
@@ -71,6 +69,7 @@ class Redis
 	{
 		return Config::get('redis', function () {
 			return [
+				'enabled' => true,
 				'cluster' => false,
 				'host' => '127.0.0.1',
 				'port' => 6379,
