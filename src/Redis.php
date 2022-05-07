@@ -44,6 +44,16 @@ class Redis
 	}
 
 	/**
+	 * @return string|null
+	 * @throws \Exception
+	 */
+	public static function getNamespace(): ?string
+	{
+		$config = self::getConfig();
+		return $config['namespace'];
+	}
+
+	/**
 	 * Magic method for Redis methods
 	 *
 	 * @param string $name
@@ -53,8 +63,8 @@ class Redis
 	public static function __callStatic(string $name, array $arguments): mixed
 	{
 		$config = self::getConfig();
-		if (!empty($arguments[0]) and $config['prefix'] ?? null)
-			$arguments[0] = $config['prefix'] . ':' . $arguments[0];
+		if (!empty($arguments[0]) and $config['namespace'] ?? null)
+			$arguments[0] = $config['namespace'] . ':' . $arguments[0];
 
 		return call_user_func_array([self::getClient(), $name], $arguments);
 	}
@@ -74,7 +84,7 @@ class Redis
 				'host' => '127.0.0.1',
 				'port' => 6379,
 				'password' => null,
-				'prefix' => null,
+				'namespace' => null,
 			];
 		});
 	}
