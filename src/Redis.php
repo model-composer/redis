@@ -80,7 +80,10 @@ class Redis
 		return Config::get('redis', [
 			[
 				'version' => '0.3.0',
-				'migration' => function () {
+				'migration' => function (array $config, string $env) {
+					if ($config) // Already existing
+						return $config;
+
 					return [
 						'enabled' => true,
 						'cluster' => false,
