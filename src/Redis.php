@@ -77,15 +77,20 @@ class Redis
 	 */
 	private static function getConfig(): array
 	{
-		return Config::get('redis', function () {
-			return [
-				'enabled' => true,
-				'cluster' => false,
-				'host' => '127.0.0.1',
-				'port' => 6379,
-				'password' => null,
-				'namespace' => null,
-			];
-		});
+		return Config::get('redis', [
+			[
+				'version' => '0.3.0',
+				'migration' => function () {
+					return [
+						'enabled' => true,
+						'cluster' => false,
+						'host' => '127.0.0.1',
+						'port' => 6379,
+						'password' => null,
+						'namespace' => null,
+					];
+				},
+			],
+		]);
 	}
 }
