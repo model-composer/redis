@@ -1,0 +1,28 @@
+<?php namespace Model\Redis;
+
+use Model\Config\AbstractConfigProvider;
+
+class ConfigProvider extends AbstractConfigProvider
+{
+	public static function migrations(): array
+	{
+		return [
+			[
+				'version' => '0.3.0',
+				'migration' => function (array $config, string $env) {
+					if ($config) // Already existing
+						return $config;
+
+					return [
+						'enabled' => true,
+						'cluster' => false,
+						'host' => '127.0.0.1',
+						'port' => 6379,
+						'password' => null,
+						'namespace' => null,
+					];
+				},
+			],
+		];
+	}
+}

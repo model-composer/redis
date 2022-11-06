@@ -14,7 +14,7 @@ class Redis
 	public static function getClient(): \RedisCluster|\Redis|null
 	{
 		if (!isset(self::$redis)) {
-			$config = self::getConfig();
+			$config = Config::get('redis');
 
 			if (!$config['enabled'])
 				throw new \Exception('Redis is disabled');
@@ -39,7 +39,7 @@ class Redis
 	 */
 	public static function isEnabled(): bool
 	{
-		$config = self::getConfig();
+		$config = Config::get('redis');
 		return $config['enabled'];
 	}
 
@@ -49,7 +49,7 @@ class Redis
 	 */
 	public static function getNamespace(): ?string
 	{
-		$config = self::getConfig();
+		$config = Config::get('redis');
 		return $config['namespace'];
 	}
 
@@ -62,38 +62,10 @@ class Redis
 	 */
 	public static function __callStatic(string $name, array $arguments): mixed
 	{
-		$config = self::getConfig();
+		$config = Config::get('redis');
 		if (!empty($arguments[0]) and $config['namespace'] ?? null)
 			$arguments[0] = $config['namespace'] . ':' . $arguments[0];
 
 		return call_user_func_array([self::getClient(), $name], $arguments);
-	}
-
-	/**
-	 * Config retriever
-	 *
-	 * @return array
-	 * @throws \Exception
-	 */
-	private static function getConfig(): array
-	{
-		return Config::get('redis', [
-			[
-				'version' => '0.3.0',
-				'migration' => function (array $config, string $env) {
-					if ($config) // Already existing
-						return $config;
-
-					return [
-						'enabled' => true,
-						'cluster' => false,
-						'host' => '127.0.0.1',
-						'port' => 6379,
-						'password' => null,
-						'namespace' => null,
-					];
-				},
-			],
-		]);
 	}
 }
