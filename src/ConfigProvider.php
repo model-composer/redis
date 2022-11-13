@@ -25,4 +25,13 @@ class ConfigProvider extends AbstractConfigProvider
 			],
 		];
 	}
+
+	public static function templating(): array
+	{
+		return [
+			'host',
+			'port',
+			'password',
+		];
+	}
 }
