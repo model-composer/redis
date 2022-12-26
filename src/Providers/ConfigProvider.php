@@ -1,4 +1,4 @@
-<?php namespace Model\Redis;
+<?php namespace Model\Redis\Providers;
 
 use Model\Config\AbstractConfigProvider;
 
