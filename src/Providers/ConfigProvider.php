@@ -23,6 +23,16 @@ class ConfigProvider extends AbstractConfigProvider
 					];
 				},
 			],
+			[
+				'version' => '0.3.6',
+				'migration' => function (array $config, string $env) {
+					return [
+						'hosts' => [
+							'main' => $config,
+						],
+					];
+				},
+			],
 		];
 	}
 

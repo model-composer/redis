@@ -4,57 +4,60 @@ use Model\Config\Config;
 
 class Redis
 {
-	private static \RedisCluster|\Redis $redis;
+	private static array $connections = [];
 
 	/**
 	 * Redis client factory
 	 *
+	 * @param string $host
 	 * @return \RedisCluster|\Redis|null
 	 */
-	public static function getClient(): \RedisCluster|\Redis|null
+	public static function getClient(string $host = 'main'): \RedisCluster|\Redis|null
 	{
-		if (!isset(self::$redis)) {
+		if (!isset(self::$connections[$host])) {
 			$config = Config::get('redis');
 
-			if (!$config['enabled'])
+			if (!$config[$host]['enabled'])
 				throw new \Exception('Redis is disabled');
 
-			if ($config['cluster']) {
-				self::$redis = new \RedisCluster(null, [$config['host'] . ':' . $config['port']]);
+			if ($config[$host]['cluster']) {
+				self::$connections[$host] = new \RedisCluster(null, [$config[$host]['host'] . ':' . $config[$host]['port']]);
 			} else {
-				self::$redis = new \Redis();
-				self::$redis->connect($config['host'], $config['port']);
+				self::$connections[$host] = new \Redis();
+				self::$connections[$host]->connect($config[$host]['host'], $config[$host]['port']);
 			}
 
-			if ($config['password'] ?? null)
-				self::$redis->auth($config['password']);
+			if ($config[$host]['password'] ?? null)
+				self::$connections[$host]->auth($config[$host]['password']);
 		}
 
-		return self::$redis;
+		return self::$connections[$host];
 	}
 
 	/**
+	 * @param string $host
 	 * @return bool
 	 * @throws \Exception
 	 */
-	public static function isEnabled(): bool
+	public static function isEnabled(string $host = 'main'): bool
 	{
 		$config = Config::get('redis');
-		return $config['enabled'];
+		return $config[$host]['enabled'];
 	}
 
 	/**
+	 * @param string $host
 	 * @return string|null
 	 * @throws \Exception
 	 */
-	public static function getNamespace(): ?string
+	public static function getNamespace(string $host = 'main'): ?string
 	{
 		$config = Config::get('redis');
-		return $config['namespace'];
+		return $config[$host]['namespace'];
 	}
 
 	/**
-	 * Magic method for Redis methods
+	 * Magic method for Redis methods (only for main host)
 	 *
 	 * @param string $name
 	 * @param array $arguments
@@ -63,8 +66,8 @@ class Redis
 	public static function __callStatic(string $name, array $arguments): mixed
 	{
 		$config = Config::get('redis');
-		if (!empty($arguments[0]) and $config['namespace'] ?? null)
-			$arguments[0] = $config['namespace'] . ':' . $arguments[0];
+		if (!empty($arguments[0]) and $config['main']['namespace'] ?? null)
+			$arguments[0] = $config['main']['namespace'] . ':' . $arguments[0];
 
 		return call_user_func_array([self::getClient(), $name], $arguments);
 	}
