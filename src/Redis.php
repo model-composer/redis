@@ -17,18 +17,18 @@ class Redis
 		if (!isset(self::$connections[$host])) {
 			$config = Config::get('redis');
 
-			if (!$config[$host]['enabled'])
+			if (!$config['hosts'][$host]['enabled'])
 				throw new \Exception('Redis is disabled');
 
-			if ($config[$host]['cluster']) {
-				self::$connections[$host] = new \RedisCluster(null, [$config[$host]['host'] . ':' . $config[$host]['port']]);
+			if ($config['hosts'][$host]['cluster']) {
+				self::$connections[$host] = new \RedisCluster(null, [$config['hosts'][$host]['host'] . ':' . $config['hosts'][$host]['port']]);
 			} else {
 				self::$connections[$host] = new \Redis();
-				self::$connections[$host]->connect($config[$host]['host'], $config[$host]['port']);
+				self::$connections[$host]->connect($config['hosts'][$host]['host'], $config['hosts'][$host]['port']);
 			}
 
-			if ($config[$host]['password'] ?? null)
-				self::$connections[$host]->auth($config[$host]['password']);
+			if ($config['hosts'][$host]['password'] ?? null)
+				self::$connections[$host]->auth($config['hosts'][$host]['password']);
 		}
 
 		return self::$connections[$host];
@@ -42,7 +42,7 @@ class Redis
 	public static function isEnabled(string $host = 'main'): bool
 	{
 		$config = Config::get('redis');
-		return $config[$host]['enabled'];
+		return $config['hosts'][$host]['enabled'];
 	}
 
 	/**
@@ -53,7 +53,7 @@ class Redis
 	public static function getNamespace(string $host = 'main'): ?string
 	{
 		$config = Config::get('redis');
-		return $config[$host]['namespace'];
+		return $config['hosts'][$host]['namespace'];
 	}
 
 	/**
@@ -66,8 +66,8 @@ class Redis
 	public static function __callStatic(string $name, array $arguments): mixed
 	{
 		$config = Config::get('redis');
-		if (!empty($arguments[0]) and $config['main']['namespace'] ?? null)
-			$arguments[0] = $config['main']['namespace'] . ':' . $arguments[0];
+		if (!empty($arguments[0]) and $config['hosts']['main']['namespace'] ?? null)
+			$arguments[0] = $config['hosts']['main']['namespace'] . ':' . $arguments[0];
 
 		return call_user_func_array([self::getClient(), $name], $arguments);
 	}
