@@ -39,9 +39,9 @@ class ConfigProvider extends AbstractConfigProvider
 	public static function templating(): array
 	{
 		return [
-			'host',
-			'port',
-			'password',
+			'hosts.*.host',
+			'hosts.*.port',
+			'hosts.*.password',
 		];
 	}
 }
